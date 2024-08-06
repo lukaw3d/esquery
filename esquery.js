@@ -15,6 +15,12 @@ const RIGHT_SIDE = 'RIGHT_SIDE';
  */
 
 /**
+ * @typedef {import('estree').Node} externalAST
+ * @typedef {object} PlainObject
+ * @typedef {number} Integer
+ */
+
+/**
  * One of the rules of `grammar.pegjs`
  * @typedef {PlainObject} SelectorAST
  * @see grammar.pegjs
@@ -30,7 +36,7 @@ const RIGHT_SIDE = 'RIGHT_SIDE';
  * in the object.
  * @param {?PlainObject} obj
  * @param {string[]} keys
- * @returns {undefined|boolean|string|number|external:AST}
+ * @returns {undefined|boolean|string|number|externalAST}
  */
 function getPath(obj, keys) {
     for (let i = 0; i < keys.length; ++i) {
@@ -43,8 +49,8 @@ function getPath(obj, keys) {
 /**
  * Determine whether `node` can be reached by following `path`,
  * starting at `ancestor`.
- * @param {?external:AST} node
- * @param {?external:AST} ancestor
+ * @param {?externalAST} node
+ * @param {?externalAST} ancestor
  * @param {string[]} path
  * @param {Integer} fromPathIndex
  * @returns {boolean}
@@ -73,7 +79,7 @@ function inPath(node, ancestor, path, fromPathIndex) {
  * A generated matcher function for a selector.
  * @callback SelectorMatcher
  * @param {?SelectorAST} selector
- * @param {external:AST[]} [ancestry=[]]
+ * @param {externalAST[]} ancestry
  * @param {ESQueryOptions} [options]
  * @returns {boolean}
 */
@@ -387,15 +393,15 @@ function generateMatcher(selector) {
 
 /**
  * @callback TraverseOptionFallback
- * @param {external:AST} node The given node.
+ * @param {externalAST} node The given node.
  * @returns {string[]} An array of visitor keys for the given node.
  */
 
 /**
  * @callback ClassMatcher
  * @param {string} className The name of the class to match.
- * @param {external:AST} node The node to match against.
- * @param {Array<external:AST>} ancestry The ancestry of the node.
+ * @param {externalAST} node The node to match against.
+ * @param {Array<externalAST>} ancestry The ancestry of the node.
  * @returns {boolean} True if the node matches the class, false if not.
  */
 
@@ -410,9 +416,9 @@ function generateMatcher(selector) {
 /**
  * Given a `node` and its ancestors, determine if `node` is matched
  * by `selector`.
- * @param {?external:AST} node
+ * @param {?externalAST} node
  * @param {?SelectorAST} selector
- * @param {external:AST[]} [ancestry=[]]
+ * @param {externalAST[]} [ancestry=[]]
  * @param {ESQueryOptions} [options]
  * @throws {Error} Unknowns (operator, class name, selector type, or
  * selector value type)
@@ -428,7 +434,7 @@ function matches(node, selector, ancestry, options) {
 
 /**
  * Get visitor keys of a given node.
- * @param {external:AST} node The AST node to get keys.
+ * @param {externalAST} node The AST node to get keys.
  * @param {ESQueryOptions|undefined} options
  * @returns {string[]} Visitor keys of the node.
  */
@@ -466,9 +472,9 @@ function isNode(node, options) {
 /**
  * Determines if the given node has a sibling that matches the
  * given selector matcher.
- * @param {external:AST} node
+ * @param {externalAST} node
  * @param {SelectorMatcher} matcher
- * @param {external:AST[]} ancestry
+ * @param {externalAST[]} ancestry
  * @param {Side} side
  * @param {ESQueryOptions|undefined} options
  * @returns {boolean}
@@ -503,9 +509,9 @@ function sibling(node, matcher, ancestry, side, options) {
 /**
  * Determines if the given node has an adjacent sibling that matches
  * the given selector matcher.
- * @param {external:AST} node
+ * @param {externalAST} node
  * @param {SelectorMatcher} matcher
- * @param {external:AST[]} ancestry
+ * @param {externalAST[]} ancestry
  * @param {Side} side
  * @param {ESQueryOptions|undefined} options
  * @returns {boolean}
@@ -534,8 +540,8 @@ function adjacent(node, matcher, ancestry, side, options) {
  * Determines if the given node is the `nth` child.
  * If `nth` is negative then the position is counted
  * from the end of the list of children.
- * @param {external:AST} node
- * @param {external:AST[]} ancestry
+ * @param {externalAST} node
+ * @param {externalAST[]} ancestry
  * @param {Integer} nth
  * @param {ESQueryOptions|undefined} options
  * @returns {boolean}
@@ -579,15 +585,15 @@ function subjects(selector, ancestor) {
 
 /**
 * @callback TraverseVisitor
-* @param {?external:AST} node
-* @param {?external:AST} parent
-* @param {external:AST[]} ancestry
+* @param {?externalAST} node
+* @param {?externalAST} parent
+* @param {externalAST[]} ancestry
 */
 
 /**
  * From a JS AST and a selector AST, collect all JS AST nodes that
  * match the selector.
- * @param {external:AST} ast
+ * @param {externalAST} ast
  * @param {?SelectorAST} selector
  * @param {TraverseVisitor} visitor
  * @param {ESQueryOptions} [options]
@@ -629,10 +635,10 @@ function traverse(ast, selector, visitor, options) {
 /**
  * From a JS AST and a selector AST, collect all JS AST nodes that
  * match the selector.
- * @param {external:AST} ast
+ * @param {externalAST} ast
  * @param {?SelectorAST} selector
  * @param {ESQueryOptions} [options]
- * @returns {external:AST[]}
+ * @returns {externalAST[]}
  */
 function match(ast, selector, options) {
     const results = [];
@@ -653,10 +659,10 @@ function parse(selector) {
 
 /**
  * Query the code AST using the selector string.
- * @param {external:AST} ast
+ * @param {externalAST} ast
  * @param {string} selector
  * @param {ESQueryOptions} [options]
- * @returns {external:AST[]}
+ * @returns {externalAST[]}
  */
 function query(ast, selector, options) {
     console.log('query', selector, JSON.stringify(parse(selector), null, 2));
