@@ -177,18 +177,22 @@ function generateMatcher(selector) {
 
                 const a = [];
                 estraverse.traverse(node, {
-                    enter (node, parent) {
+                    enter (descendant, parent) {
+                        if (node === descendant) return;
                         if (parent != null) { a.unshift(parent); }
 
                         for (let i = 0; i < matchers.length; ++i) {
-                            if (matchers[i](node, a, options)) {
+                            if (matchers[i](descendant, a, options)) {
                                 result = true;
                                 this.break();
                                 return;
                             }
                         }
                     },
-                    leave () { a.shift(); },
+                    leave (descendant) {
+                        if (node === descendant) return;
+                        a.shift();
+                    },
                     keys: options && options.visitorKeys,
                     fallback: options && options.fallback || 'iteration'
                 });

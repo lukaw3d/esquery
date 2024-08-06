@@ -45,7 +45,7 @@ describe('Complex selector query', function () {
         assert.isEmpty(matches);
     });
 
-    it('fails :has should not match self', function () {
+    it(':has should not match self', function () {
         const matches = esquery(simpleProgram, 'BlockStatement:has(BlockStatement:has(BlockStatement))');
         assert.equal(0, matches.length);
 
