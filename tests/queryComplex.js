@@ -44,4 +44,15 @@ describe('Complex selector query', function () {
         const matches = esquery(simpleProgram, 'NonExistingNodeType > *');
         assert.isEmpty(matches);
     });
+
+    it('fails :has should not match self', function () {
+        const matches = esquery(simpleProgram, 'BlockStatement:has(BlockStatement:has(BlockStatement))');
+        assert.equal(0, matches.length);
+
+        const matches2 = esquery(simpleProgram, 'Identifier:has([name="y"])');
+        assert.equal(0, matches2.length);
+
+        const matches3 = esquery(simpleProgram, 'BlockStatement:matches(BlockStatement:matches(BlockStatement))');
+        assert.equal(1, matches3.length);
+    });
 });
