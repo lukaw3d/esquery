@@ -115,6 +115,16 @@ function getMatcherOrig(selector) {
 function getMatcher(selector) {
     const matcher = getMatcherOrig(selector);
     return (node, ancestry, options) => {
+        if (selector && matcher(node, ancestry, options)) {
+            console.log(
+                'matched',
+                selector.type,
+                ancestry.map(a => a.type).reverse().join(',') || '[]',
+                node.type, '⚟',
+                getVisitorKeys(node).flatMap(k => node[k] || []).map(a => a.type),
+                selector.isRoot ? 'root??' : '',
+            );
+        }
         // `has` traversal pushes its parent node into ancestry; so expect 1 ancestor even at the root
         const satisfiesIsRoot = selector && selector.isRoot ? ancestry.length < 2 : true;
         return matcher(node, ancestry, options) && satisfiesIsRoot;
@@ -181,6 +191,11 @@ function generateMatcher(selector) {
             const matchers = selector.selectors.map(getMatcher);
             return (node, ancestry, options) => {
                 let result = false;
+                console.log('has!',
+                    ancestry.map(a => a.type).reverse().join(',') || '[]',
+                    node.type, '⚟',
+                    getVisitorKeys(node).flatMap(k => node[k] || []).map(a => a.type),
+                );
 
                 const a = [];
                 estraverse.traverse(node, {
@@ -208,6 +223,22 @@ function generateMatcher(selector) {
             const left = getMatcher(selector.left);
             const right = getMatcher(selector.right);
             return (node, ancestry, options) => {
+                if (right(node, ancestry, options)) console.log('child right matches',
+                    ancestry.map(a => a.type).reverse().join(',') || '[]',
+                    node.type, '⚟',
+                    getVisitorKeys(node).flatMap(k => node[k] || []).map(a => a.type),
+                    selector,
+                );
+                if (ancestry.length > 0 && left(ancestry[0], ancestry.slice(1), options)) console.log('child left matches',
+                    ancestry.map(a => a.type).reverse().join(',') || '[]',
+                    node.type, '⚟',
+                    getVisitorKeys(node).flatMap(k => node[k] || []).map(a => a.type),
+                    selector,
+                );
+                /*if (ancestry.length === 0 && selector.left.type === 'exactNode') {
+                    debugger;
+                    return right(node, ancestry, options) && left(node, [], options)
+                }*/
                 if (ancestry.length > 0 && right(node, ancestry, options)) {
                     return left(ancestry[0], ancestry.slice(1), options);
                 }
@@ -628,6 +659,7 @@ function parse(selector) {
  * @returns {external:AST[]}
  */
 function query(ast, selector, options) {
+    console.log('query', selector, JSON.stringify(parse(selector), null, 2));
     return match(ast, parse(selector), options);
 }
 
